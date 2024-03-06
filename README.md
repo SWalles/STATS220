@@ -3,7 +3,7 @@
 ## Introduction
 Kia Ora! This is a repository for my projects for the STATS 220 course from the University of Auckland. This is a course about the use of different data technologies. This repository will collect my progress as I engage with the subject and record my progress as I improve.
 
-## Projects:
+## Project content:
 1. **Project 1**
 - Markdown
 - R and the magick package
@@ -16,4 +16,7 @@ Kia Ora! This is a repository for my projects for the STATS 220 course from the 
 - Placeholder
 
 *Note: I am taking this course in the first semester of 2024 and I will update the repository as I progress through the course.*
+
+![](https://i.gifer.com/Cwgf.gif)
+
 ---
