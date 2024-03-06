@@ -6,7 +6,7 @@ Kia Ora! This is a repository for my projects for the STATS 220 course from the 
 ## Project content:
 1. **Project 1**
 - [Markdown](https://www.markdownguide.org/cheat-sheet/)
-- R and the magick package
+- R and the [magick](https://cran.r-project.org/web/packages/magick/vignettes/intro.html) package
 - R Markdown and HTML
 3. **Project 2**
 - Placeholder
