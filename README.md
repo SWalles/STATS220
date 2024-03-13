@@ -7,7 +7,10 @@ Kia Ora! This is a repository for my projects for the STATS 220 course from the 
 1. **Magick-cal Memes**
 - [Markdown](https://www.markdownguide.org/cheat-sheet/)
 - R and the [Magick](https://cran.r-project.org/web/packages/magick/vignettes/intro.html) Package
+- - meme.R
 - R Markdown and HTML
+- - project1_report.Rmd
+  - project1_report.html
 3. **Project 2**
 - Placeholder
 3. **Project 3**
