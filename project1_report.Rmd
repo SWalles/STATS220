@@ -1,0 +1,161 @@
+---
+title: "Creating images with R"
+subtitle: "with a little bit of magick"
+author: "Stefan Walles"
+output: html_document
+---
+
+___
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=FALSE, error=FALSE)
+library(magick)
+library(tidyverse)
+```
+
+```{css}
+body {
+  background-color: #d4eeff;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  font-family: Verdana;
+}
+#header {
+  background-color: #056cb0;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  border-style: solid;
+  border-color: black;
+  border-radius: 25px;
+}
+h2 {
+  background-color: white;
+  text-align: center;
+  padding: 10px;
+  border-style: solid;
+  border-color: white;
+  border-radius: 25px;
+}
+hr {
+  border: 2px solid black;
+}
+```
+
+## Project requirements
+
+ **GitHub**
+
+I created a GitHub account with the username SWalles. I then created a new repository and called it "[stats220](https://github.com/SWalles/STATS220)". I then created a README.md file in the repository to provide a brief explanation of my plans for the repository. I used markdown syntax to provide a better user experience including:
+
+- Different levels of headers (h1 for the title and h2 for the different sections)
+- Ordered bullet points for projects
+- Unordered bullet points for project components
+- Bold for project names
+- Italics for a note at the bottom
+- Link to a websites about Markdown syntax
+- Link to a website about the Magick R package
+
+*Repo link: https://github.com/SWalles/STATS220*
+
+**R Project Folder**
+
+I created a new R Project called "Project1". Here is the folder for that project.
+
+![Project1 Folder](RProjectFolder.PNG)
+
+## My meme
+
+**Insporation Meme**
+
+![](inspo_meme.jpg)
+
+The meme consists of four panes. Two panes contain text and the other two contain an image of a happy man and the last pane contains a distorted image of the same man. I will rotate / shuffle the panes around so they can be read left to right, top to bottom. I will also change the text to something more statistics appropriate and add some images to go with the text. Instead of the images of a man I will use a kitten and use the image_negate() function to create a distorted version. I will also add borders to the frames so that they are nicer to present. 
+
+```{r meme-code, eval=TRUE}
+# Frame 1
+frm1_words <- image_blank(width = 250, height = 50, color = "#91d2f2") %>% 
+  image_annotate("Normal Distribution", gravity = "center", size = 20)
+
+frm1_image <- image_read("https://www.scribbr.com/wp-content/uploads/2023/02/standard-normal-distribution-example.webp") %>% 
+  image_scale("250x200")
+
+frm1 <- c(frm1_words, frm1_image) %>% 
+  image_append(stack = TRUE) %>% 
+  image_extent("250x250", color = "#91d2f2") %>% 
+  image_border(color = "black", geometry = "2x2")
+  
+
+# Frame 2
+frm2_image <- image_read("https://i.ebayimg.com/images/g/jw4AAOSwvv1krzzl/s-l1200.webp") %>% 
+  image_scale(geometry = "250x250")
+frm2 <- frm2_image %>% 
+  image_extent("250x250", color = "#91d2f2") %>% 
+  image_border(color = "black", geometry = "2x2")
+
+
+# Frame 3
+frm3_words <- frm1_words
+
+frm3_image <- image_read("https://www.investopedia.com/thmb/vEnFyFaX2zK96wVerxokPmEt3dU=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Clipboard01-fdb217713438416cadafc48a1e4e5ee4.jpg")  %>% 
+  image_scale("250x200")
+
+frm3 <- c(frm3_words, frm3_image) %>% 
+  image_append(stack = TRUE) %>% 
+  image_extent("250x250", color = "#91d2f2") %>% 
+  image_border(color = "black", geometry = "2x2")
+
+
+# Frame 4
+frm4 <- frm2_image %>% 
+  image_negate() %>% 
+  image_extent("250x250", color = "#91d2f2") %>% 
+  image_border(color = "black", geometry = "2x2")
+
+
+# Assemble meme
+meme_p1 <- c(frm1, frm2) %>% 
+  image_append()
+
+meme_p2 <- c(frm3, frm4) %>% 
+  image_append()
+
+meme <- c(meme_p1, meme_p2) %>% 
+  image_append(stack = TRUE)
+
+# View
+meme
+
+```
+
+
+```{r animation-code, eval=FALSE}
+# NB This chunk requires the frames from the previous chunk to function
+# Animate meme
+meme_animation <- c(frm1, frm2, frm3, frm4) %>% 
+  image_scale(geometry = "500x500") %>% 
+  image_animate(fps = 0.5)
+meme_animation
+```
+
+As the animated meme won't be displayed in Markdown I will include it here.
+
+![](my_animation.gif)
+
+## Creativity
+  
+I feel that my project demonstrates creativity in two main ways:
+
+1. I made an effort to do research into the magic package. This allowed me to use functions like image_extent, image_border and image_negate to make sure that the quality and presentation of the meme I created was satisfactory.
+
+2. I spent a lot of time with the css code to improve the presentation of this document. I analysed the html code using notepad++ to find the correct identifiers I would need to achieve the effect I wanted. I also read up on css to find the properties I needed.
+
+## Learning reflection
+
+I have finished a couple of other statistics courses that have required me to use R Markdown to do assignment so I had some basic markdown knowledge coming into this course. I have however enjoyed learning about markdown as a technology as well as some formal syntax regarding its use. Learning about how to embed links and images using markdown was a real highlight for me. 
+
+I also feel that learning about css was very important as it will allow me to create documents that are less generic and have a unique and exciting presentation. This is important as it could allow for more effective communication of ideas.
+
+I am excited to learn more about R packages. Up to now I have mainly been exposed only to base R. Learning about different packages and their applications, like "magick", would allow me more freedom while using R.
+
+___
