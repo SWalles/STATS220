@@ -1,0 +1,259 @@
+---
+title: "Habits Regarding Social Media"
+subtitle: "STATS 220 Semester One 2024"
+author: "Stefan Walles (swal435)"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warnig = FALSE, error = FALSE)
+library(tidyverse)
+library(ggwordcloud)
+```
+
+``` {css, echo = FALSE}
+body {
+  background-color: #ebf5ff;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  font-family: Verdana;
+}
+#header {
+  background-color: #056cb0;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  border-style: solid;
+  border-color: black;
+  border-radius: 25px;
+}
+h2 {
+  background-color: white;
+  text-align: center;
+  padding: 10px;
+  border-style: solid;
+  border-color: white;
+  border-radius: 25px;
+}
+hr {
+  border: 2px solid black;
+```
+
+___
+
+![](https://images.tech.co/wp-content/uploads/2022/10/14123538/socialmedia-1-1024x512.jpg)
+
+## Introduction
+
+I am not a very avid user of social media, but I recognise that this is not the case for everyone. I therefore decided to create a form to investigate people's social media habits. I was interested to know how much time people spent on social media and what sorts of social media they used. I also recorded some information about the kind of people who answered the form, like age, interest, and personality type. I made sure to keep respondents anonymous.
+
+I was careful about using response validation. For numeric answers I specified specific ranges. For ages I only allowed values from 12 to 120. For the number of hours spent on social media I only allowed values between 0 and 168 as there are only 168 hours in a week. I also asked people to describe their sentiment towards social media. I validated this question using a regular expression (`^[a-zA-Z]{1,16}$`) that only allowed one word of up to 16 characters. On reflection I realised I also should not allowed upper-case letters. All other questions had fixed options for participants to choose from.
+
+For analysing changes between weeks, I could calculate and compare the mean hours spent on social media for each week. I also asked people to rate their feelings toward social media on a 1 to 5 scale (negative to positive). This could allow me to track how people feel about social media over time. I can also track popularity across some social media platforms using the data from question 5.
+
+Link: [https://forms.gle/W83LCSFhKMKk4Y937](https://forms.gle/W83LCSFhKMKk4Y937)
+
+## Analytics
+
+``` {r}
+# Read in the data
+learning_data <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSRQQO-vbQ5MTxptDnxvM2lm94UeZt2JqBEtiw_hC0RL1ys8P1WMNdxdl4up__bGN-jfW-kh3DbTZ8D/pub?gid=363618696&single=true&output=csv")
+
+# Rename the variables
+learning_data <- learning_data %>% 
+  rename(
+    date = 1,
+    age = 2,
+    interests = 3,
+    personality = 4,
+    sm_hours = 5,
+    platforms = 6,
+    sm_type = 7,
+    rating = 8,
+    sentiment = 9
+  )
+```
+
+### Participation
+
+**AGE**
+
+``` {r}
+# Create Histogram
+learning_data %>% 
+  ggplot(mapping = aes(x = age)) +
+  geom_histogram(binwidth = 15, fill = "steelblue1", colour = "black") +
+  labs(title = "Histogram of age distribution of participants",
+       x = "Ages",
+       y = "Count")
+
+# Dynamic statement
+paste("The oldest person is", max(learning_data$age), 
+      "years old and the youngest person is",
+      min(learning_data$age), "years old. The mean age of participants is approximately", 
+      round(mean(learning_data$age)), "years.")
+```
+
+
+**Interests**
+
+``` {r}
+# Seperate and clean data
+interests <- str_split(learning_data$interests, ", ") %>% 
+  unlist()
+
+interests <- interests[!(interests == "eg. Camping" |
+                           interests == "Hiking" |
+                           interests == "Fishing" |
+                           interests == "etc.")]
+
+# Make a bar chart
+interests %>% 
+  as_tibble() %>% 
+  ggplot() +
+  geom_bar(aes(y = interests), fill = "steelblue1") +
+  labs(title = "Bar Chart of Participant Interest",
+       y = "Interests",
+       x = "Counts")
+```
+
+I took STATS 380 last semester so I was able to split the responses and clean the data a bit. I made a mistake to use commas in the question. When I split the responses I got some that I did not want like "eg. Camping", so I had to remove them.
+
+**Personality**
+
+I asked people to choose between doing something fun, doing something creative, or learning something new. I then classified them as either "playful", "creative", or "academic" respectively.
+
+``` {r}
+# Classify and relabel data
+learning_data <- learning_data %>% 
+  mutate(personality = factor(personality,
+                              levels = c("Doing something fun",
+                                         "Partaking in a creative activity",
+                                         "Learning something new"), 
+                              labels = c("Playful", "Creative", "Academic")))
+
+# Plot a bar chart
+learning_data %>% 
+  ggplot() +
+  geom_bar(aes(y = personality), fill = "steelblue1") +
+  labs(title = "Bar Chart of Personality Types",
+       y = "Personaility Type",
+       x = "Counts")
+```
+
+Most people from my participants seem to prefer having fun over learning or being creative.
+
+### Social Media Habits
+
+**How much time do people spend on social media per week?**
+
+``` {r}
+# Create histogram
+learning_data %>% 
+  ggplot(mapping = aes(x = sm_hours)) +
+  geom_histogram(binwidth = 10, fill = "steelblue1", colour = "black") +
+  labs(title = "Histogram of Hours Spent on Social Media in a Week",
+       x = "Social Media Hours",
+       y = "Count")
+
+# Dynamic statement
+paste("The most time spent on social media in a week is", 
+      max(learning_data$sm_hours), 
+      "hours and the least is",
+      min(learning_data$sm_hours), 
+      "hours. The mean time spent on social media in a week is approximately", 
+      trunc(mean(learning_data$sm_hours)), 
+      "hours and",
+      round(mean(learning_data$sm_hours)%%1 * 60),
+      "minutes.")
+```
+
+**What kinds of social media do people prefer to use?**
+
+```{r}
+#Platforms
+# Seperate multiple choices by one participant
+platforms <- str_split(learning_data$platforms, ", ") %>% 
+  unlist()
+
+# Create bar chart
+platforms %>% 
+  as_tibble() %>% 
+  ggplot() +
+  geom_bar(aes(y = platforms), fill = "steelblue1") +
+  labs(title = "Bar Plot of Platform Use by Participants",
+       y = "Social Media Platform",
+       x = "count")
+
+# Social Media Type
+# Remove the examples using code learned in STATS 380
+learning_data <- learning_data %>% 
+  mutate(sm_type = sub(" \\(eg.+\\)$", "", sm_type))
+
+# Craete bar chart
+learning_data %>% 
+  ggplot() +
+  geom_bar(aes(y = sm_type), fill = "steelblue1") +
+  labs(title = "Favourite Social Media Types",
+       y = "Social Media Type",
+       x = "Count")
+
+```
+
+Using knowledge from STATS 380 I was able to separate different choices by an individual as well as remove the examples I provided in the question.
+
+**How do people feel about social media?**
+```{r}
+# Ratings
+#Create a bar chart
+learning_data %>% 
+  ggplot() +
+  geom_bar(aes(x = rating), fill = "steelblue1") +
+  labs(title = "General Feelings Toward Social Media",
+       x = "Score out of 5",
+       y = "Count")
+```
+
+It seems that most people have a more positive view about social media. This can be seem as most people scored it average or better (3 to 5).
+
+```{r}
+# Sentiment
+# Manipulate data to create a word chart using ggwordcloud
+learning_data <- learning_data %>% 
+  mutate(sentiment = tolower(sentiment),
+         sentiment_count = as.numeric(table(sentiment)[sentiment]))
+# Plot a word cloud
+learning_data %>% 
+  ggplot(aes(label = sentiment, colour = sentiment_count)) +
+  geom_text_wordcloud() +
+  theme_minimal()
+```
+
+### Reflection
+
+Most of my participants were around 15 to 20 years old. They had a variety of interests and I have classified most of them as playful.
+
+A lot of my participants spend upwards of 10 hours a week on social media. Youtube, Instagram, and Facebook are the most popular social media platforms among my participants and they also seem too have a preference for Video Sharing / Streaming platforms.
+
+Most of my participants have rated their feelings toward social media as 3 or better on a scale from 1 to 5. When asked to describe their sentiment towards social media I got a wide variety of responses from "entertaining" and "informative" to "addicting" and "resentment".
+
+## Creativity
+
+I believe that I mostly demonstrated creativity with regards to the last question on my form. I asked people to describe in one word how they generally felt about social media. I used a regular expression to limit answers to one word of up to 16 characters. I then had to find a way to display this information in my report. After doing some research I settled on using the ggwordcloud package to create a word cloud and colour words according to their popularity.
+
+I also applied knowledge I have gained from other courses like STATS 380 to improve the presentation of the data in the analytics section. 
+
+In the interest of full transparency, the css code for this assignment was reused from project 1.
+
+## Learning Reflection
+
+The most interesting I idea I learned about in this module was on how to create reports on data that could change as the data changes. It was really interesting for me to discover that you can use Google Forms to create a Google Sheets file that updates automatically. I also enjoyed learning about the publishing feature and using the link from that to get updated information for your report.
+
+I believe that the guidelines we learned about for creating forms are really important for collecting accurate and useful information while ensuring that participants feel safe engaging with it. If participants feel safe and comfortable they can be more likely to give you accurate information.
+
+As I have declared above I have taken some other statistics courses and have been exposed to R and the tidyverse through those. I am however exited to learn more about the ggplots2 package and creating interesting graphics to visualise data.
+
+___
