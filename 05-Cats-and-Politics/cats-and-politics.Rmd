@@ -1,0 +1,94 @@
+---
+title: "Project 5"
+subtitle: "Creating data from digital sources"
+author: "Stefan Walles (swal435)"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=FALSE, error=FALSE)
+```
+
+``` {css, echo = FALSE}
+body {
+  background-color: #ebf5ff;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  font-family: Verdana;
+}
+#header {
+  background-color: #056cb0;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  border-style: solid;
+  border-color: black;
+  border-radius: 25px;
+}
+h2 {
+  background-color: white;
+  text-align: center;
+  padding: 10px;
+  border-style: solid;
+  border-color: white;
+  border-radius: 25px;
+}
+hr {
+  border: 2px solid black;
+}
+img {
+  border-radius: 8px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 75%;
+}
+```
+
+## Part A
+
+The data context I selected was the differences between different types of cat breeds. I have three cats at home each with their own personalities. I was interested in finding out what effect breed had on a cat's personality. I found a website that facilitates the adoption of cats which had information on different cat breeds and their personalities. So that is what I used for part A.
+
+```{r file='partA.R'}
+
+```
+
+## Part B
+
+```{r file='partB.R', results='hide'}
+
+```
+
+I investigated four aspects with regards to Minister Hon Erica Stanford's releases:
+
+- On average her releases have `r mean_number_of_words` words.
+- On average each paragraph in the releases contained `r mean_number_of_words_per_paragraph` words.
+- I noticed that her releases were quite quote heavy. On average each release contained `r mean_number_of_quotes` quotes.
+- Minister Hon Erica Stanford is the minister for education and immigration.However,  `r percentage_of_education_releases`% of her releases are about education.
+
+## Part C
+
+```{r file='partC.R'}
+
+```
+
+From the visualisation we can clearly see that Education was a very popular topic, in the past, compared to data and immigration, but that it has become less popular in more recent years.
+
+## Learning Reflextion
+
+The thing I most enjoyed learning about in this module was web scraping. I think it is really important as it allows you access to stores of information that otherwise would be very cumbersome to collect or get access to. I do however recognise my responsibility to make sure that I am allowed to scrape data before I do so.
+
+During Task A I ran into a problem where search results were distributed over several pages, but the URLs for each of these pages would return the same results. In the end I only used results from the first page. I would like to expand my knowledge about web scraping and websites in general to be able to fix similar issues in the future.
+
+## Self Review
+
+Thinking back I learned a lot while working on the 5 projects for this course. 
+
+One thing that I really enjoyed learning about was creating plots using ggplots2. I have learned how to create many different kinds of plots and how to customise them to fit my needs.
+
+Another important thing I learned was about collecting and using data from digital sources. In project 1 we used a Google form together with a published Google document to collect data and report on it in a dynamic way. For project 4 we used an API and for project 5 we used web scraping. These concepts allows me to easily access data that otherwise could have been difficult to obtain.
+
+Learning outcome 5: "Select and combine a range of data technologies, including HTML and CSS for reporting and web scraping" describes what I believe is the most important thing that I have learned. Using and taking advantage of these technologies not only makes things easier, but also allows for more effective reporting and communication.

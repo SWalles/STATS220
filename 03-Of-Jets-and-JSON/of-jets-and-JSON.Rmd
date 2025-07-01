@@ -1,0 +1,202 @@
+---
+title: "Of Jets and JSON"
+subtitle: "STATS 220 Semester One 2024"
+author: "Stefan Walles (swal435)"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=FALSE, error=FALSE)
+
+#Libraries
+library(tidyverse)
+library(ggwordcloud)
+
+#Read data
+photo_data <- read_csv("selected_photos.csv")
+```
+
+``` {css, echo = FALSE}
+body {
+  background-color: #ebf5ff;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  font-family: Verdana;
+}
+#header {
+  background-color: #056cb0;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  border-style: solid;
+  border-color: black;
+  border-radius: 25px;
+}
+h2 {
+  background-color: white;
+  text-align: center;
+  padding: 10px;
+  border-style: solid;
+  border-color: white;
+  border-radius: 25px;
+}
+hr {
+  border: 2px solid black;
+}
+img {
+  border-radius: 8px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 75%;
+}
+```
+
+## Introduction
+
+I did a search on [pixabay](pixabay.com) for the term: **fighter jets**. I have always been fascinated by aircraft and especially military aircraft. So, I took the opportunity to look at some cool pictures of planes.
+
+![](top_photos.png)
+
+I noticed some features that seemed to generally apply to the photos:
+
+* Most in landscape
+* Most have high resolution
+* High variability in views (<100 to >200,000)
+* Popular Tags : "aircraft", "airplane", "figter jet", "airforce", "plane"
+* Most photos heavily features blues and white/greys of the sky
+* Variety of different types of aircraft
+* Some photos include pilots or ground crew
+* Some photos seem to depict futuristic or AI generated planes that don't exist
+
+
+``` {r}
+photo_data %>% 
+  select(`Picture Links` = pageURL) %>%
+  slice(1:5) %>%
+  knitr::kable()
+```
+
+![](my_photos.gif)
+
+## Key Features of Selected Photos
+
+### What was the range of number of views for these photos?
+
+``` {r}
+# Range of view counts
+view_range <- photo_data %>% 
+  pull(views) %>% 
+  range()
+```
+
+Before we analysed the data we observed that the photos had a wide variety of view counts and upon inspection of the data we find that from our selected photos, the one with the least views had `r view_range[1]` views and the one with the most views had `r format(view_range[2], scientific = F)` views.
+
+### How many different users are associated with these photos?
+
+``` {r}
+# Number of users
+num_users <- photo_data %>% 
+  pull(user) %>% 
+  unique() %>% 
+  length()
+```
+
+Each photo in pixabay has a user associated with it and our selection of photos are associated with `r num_users` different users. Here are the top 5!
+
+```{r}
+photo_data %>%
+  group_by(user) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>%
+  slice(1:5) %>%
+  knitr::kable()
+```
+
+
+### How likely is a photo to be downloaded after it is viewed?
+
+``` {r}
+# Middle 75% of download view percentage
+mid_75_down_view_percentage <- photo_data %>% 
+  pull(download_view_proportion) %>% 
+  quantile(c(0.125, 0.875)) * 100
+```
+
+From my investigation I found that the percentage of people who downloaded a photo after viewing it was between `r round(mid_75_down_view_percentage[1], 1)`% and `r round(mid_75_down_view_percentage[2], 1)`% for 75% (12.5% to 87.5% quantile) of the photos.
+
+### Are more popular photos more likely to be liked?
+
+During analysis I assigned a category (Very Popular, Popular, Average, Unpopular) to each photo each photo according to their number of views on a logarithmic scale. I was curious about whether photos with more views were more likely to get liked so I calculated a "like score" (likes per view x 10 000) for each photo that accounted for the number of views that photo got. Finally I calculated the mean "like score" for each popularity category.
+
+``` {r}
+# Mean likes score (adjusted for views) by popularity
+likes_by_pop <- photo_data %>% 
+  mutate(like_adj = likes / views * 1e4) %>% 
+  group_by(popularity) %>% 
+  summarise(mean_likes = mean(like_adj))
+
+# Output summary table
+likes_by_pop %>% 
+  rename(Popularity = popularity,
+         `Mean Like Score` = mean_likes) %>% 
+  mutate(Popularity = ordered(Popularity, 
+                              levels = c("Unpopular", "Average", "Popular", "Very Popular"))) %>%
+  arrange(desc(Popularity)) %>%
+  knitr::kable(digits = 0)
+```
+
+These results were surprising as the `r with(likes_by_pop, popularity[mean_likes == max(mean_likes)])` category got the highest mean like score and the `r with(likes_by_pop, popularity[mean_likes == min(mean_likes)])` category got the lowest mean like score. It would seem images with more views get smaller proportions of likes compared to views.
+
+I had a look at what tags were used to describe the selected photos. Here is a table showing some information about the top 10 tags!
+
+``` {r}
+# Separate tags into different rows
+tags <- photo_data %>% 
+  separate_rows(tags, sep = ", ")
+
+# Interesting table
+tags_table <- tags %>% 
+  group_by(tags) %>% 
+  summarise(tag_count = n(),
+            mean_views = mean(views),
+            mean_downloads = mean(downloads),
+            mean_likes = mean(likes),
+            largest = paste0(round(max(imageSize) / 1e6, 2), "MB")) %>% 
+  arrange(desc(tag_count))
+
+tags_table %>% 
+  rename(Tags = tags, Count = tag_count, `Mean Views` = mean_views, `Mean Downloads` = mean_downloads, `Mean Likes` = mean_likes, `Largest Photo Size` = largest) %>% 
+  slice(1:10) %>% 
+  knitr::kable(digits = 0)
+```
+
+To give a better overview of the variety of tags used I revisited the ggwordcloud package I used in Project 2.
+
+``` {r}
+# Create word cloud
+tags_table %>% 
+  ggplot() +
+  geom_text_wordcloud(aes(label = tags, size = tag_count, colour = tag_count)) +
+  scale_size_area(max_size = 13) +
+  theme_minimal()
+```
+
+## Learning Reflection
+
+I really enjoyed this module and learned about a lot of important ideas. Firstly, I really liked learning about APIs and using them to obtain data. APIs make it easy to obtain relevant and current data for analysis. We also learned about JSON data and how to work with it. Finally, I developed more skills with regards to the manipulation of data frames to get the information that I want from them.
+
+I am really interested to learn more about different data sources and expand my knowledge of APIs. This would allow me to easily gather data to answer questions that I might have.
+
+## Appendix
+
+```{r file='exploration.R', eval=FALSE, echo=TRUE}
+
+```
+
+Here you can see some more of my data exploration and preparation code.
+
+___
